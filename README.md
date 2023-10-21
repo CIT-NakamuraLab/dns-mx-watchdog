@@ -17,7 +17,7 @@ DNSのMXレコードを監視して一定期間ごとにslackへ通知します
 version: '3'
 services:
   dns-watchdog:
-    image: ghcr.io/quadseed/dns-mx-watchdog:latest
+    image: ghcr.io/CIT-NakamuraLab/dns-mx-watchdog:latest
     restart: unless-stopped
     environment:
       TZ: Asia/Tokyo
