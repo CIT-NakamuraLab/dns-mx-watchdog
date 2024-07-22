@@ -2,18 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/miekg/dns"
-	"github.com/slack-go/slack"
 	"log"
 	"os"
 	"time"
+
+	"github.com/miekg/dns"
+	"github.com/slack-go/slack"
 )
 
 func main() {
 	token := os.Getenv("SLACK_BOT_TOKEN")
 	channelId := os.Getenv("CHANNEL_ID")
 
-	dnsServer := os.Getenv("DNS_SERVER")
+	priDnsServer := os.Getenv("PRI_DNS_SERVER")
+	secDnsServer := os.Getenv("SEC_DNS_SERVER")
 	domain := os.Getenv("DOMAIN")
 
 	client := slack.New(token)
@@ -24,12 +26,12 @@ func main() {
 	log.Printf("DNS Watchdog task has been started")
 
 	count := 24
-	execLookup(*client, channelId, dnsServer, domain, &count)
+	execLookup(*client, channelId, priDnsServer, secDnsServer, domain, &count)
 	for {
 		select {
 		case <-ticker.C:
 			log.Printf("count=%d\n", count)
-			execLookup(*client, channelId, dnsServer, domain, &count)
+			execLookup(*client, channelId, priDnsServer, secDnsServer, domain, &count)
 		}
 	}
 }
@@ -53,16 +55,17 @@ func lookupMXRecords(dnsServer string, domain string) bool {
 	return true
 }
 
-func execLookup(client slack.Client, channelId string, dnsServer string, domain string, count *int) {
-	ok := lookupMXRecords(dnsServer, domain)
-	if ok {
+func execLookup(client slack.Client, channelId string, priDnsServer string, secDnsServer string, domain string, count *int) {
+	pri_ok := lookupMXRecords(priDnsServer, domain)
+	sec_ok := lookupMXRecords(secDnsServer, domain)
+	if pri_ok && sec_ok {
 		*count++
 		if *count > 24 {
 			*count = 0
-			SendDailyNotification(client, channelId, dnsServer, domain)
+			SendDailyNotification(client, channelId, priDnsServer, secDnsServer, domain)
 		}
 	} else {
 		*count = 0
-		SendHourlyNotification(client, channelId, dnsServer, domain)
+		SendHourlyNotification(client, channelId, priDnsServer, secDnsServer, domain, pri_ok, sec_ok)
 	}
 }

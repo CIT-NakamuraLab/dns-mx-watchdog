@@ -9,7 +9,8 @@ DNSのMXレコードを監視して一定期間ごとにslackへ通知します
 |-----------------|-----------------------------|
 | SLACK_BOT_TOKEN | `xoxb-` から始まるslack botのトークン |
 | CHANNEL_ID      | 通知の送信先のslackのチャンネルID        |
-| DNS_SERVER      | 参照するDNSサーバ (ポート番号まで指定する)    |
+| PRI_DNS_SERVER  | 参照するプライマリDNSサーバ (ポート番号まで指定する)    |
+| SEC_DNS_SERVER  | 参照するセカンダリDNSサーバ (ポート番号まで指定する)    |
 | DOMAIN          | 問い合わせたいドメイン                 |
 
 ### 設定例
@@ -23,7 +24,8 @@ services:
       TZ: Asia/Tokyo
       SLACK_BOT_TOKEN: xoxb-xxxxxxx
       CHANNEL_ID: XXXXXXXX
-      DNS_SERVER: XXXXXXXX
+      PRI_DNS_SERVER: XXXXXXXX
+      SEC_DNS_SERVER: XXXXXXXX
       DOMAIN: XXXXXXXX
 ```
 

@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/slack-go/slack"
 	"log"
 	"time"
+
+	"github.com/slack-go/slack"
 )
 
-func SendDailyNotification(client slack.Client, channelId string, dnsServer string, domain string) {
+func SendDailyNotification(client slack.Client, channelId string, priDnsServer string, secDnsServer string, domain string) {
 	attachment := slack.Attachment{
 		Title: "DNS MX Query Successful (daily report)",
 		Color: "good",
@@ -18,8 +19,12 @@ func SendDailyNotification(client slack.Client, channelId string, dnsServer stri
 				Value: "*" + domain + "*",
 				Short: false,
 			}, {
-				Title: "DNS Server",
-				Value: "*" + dnsServer + "*",
+				Title: "Primary DNS Server",
+				Value: "*" + priDnsServer + "*",
+				Short: false,
+			}, {
+				Title: "Secondary DNS Server",
+				Value: "*" + secDnsServer + "*",
 				Short: false,
 			},
 			{
@@ -42,7 +47,7 @@ func SendDailyNotification(client slack.Client, channelId string, dnsServer stri
 	log.Printf("[daily report] Message successfully sent to channel")
 }
 
-func SendHourlyNotification(client slack.Client, channelId string, dnsServer string, domain string) {
+func SendHourlyNotification(client slack.Client, channelId string, priDnsServer string, secDnsServer string, domain string, pri_ok bool, sec_ok bool) {
 	attachment := slack.Attachment{
 		Pretext: "<!channel>",
 		Title:   "DNS MX Query FAILED (hourly report)",
@@ -54,8 +59,16 @@ func SendHourlyNotification(client slack.Client, channelId string, dnsServer str
 				Value: "*" + domain + "*",
 				Short: false,
 			}, {
-				Title: "DNS Server",
-				Value: "*" + dnsServer + "*",
+				Title: "Primary DNS Server",
+				Value: "*" + priDnsServer + "*",
+				Short: false,
+			}, {
+				Title: "Secondary DNS Server",
+				Value: "*" + secDnsServer + "*",
+				Short: false,
+			}, {
+				Title: "Status",
+				Value: fmt.Sprintf("*Primary: %t, Secondary: %t*", pri_ok, sec_ok),
 				Short: false,
 			},
 			{
